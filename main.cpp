@@ -12,6 +12,7 @@
 #define N_RIDERS 5
 #define T_WANDER 100 /* each wandering time is between 0 to T_WANDER */
 #define T_BUMP 40    /* each bumping time is between 0 to T_BUMP */
+#define T_DISPLAY 2  /* time between situational display */
 
 sem_t RiderPresent;
 // Mutex to prevent concurrent writes to list
@@ -140,6 +141,8 @@ void *Display(void *dummy) {
         printf("Rider i is in a car.\n");
       }*/
     }
+
+    std::this_thread::sleep_for(std::chrono::seconds(T_DISPLAY));
   }
 }
 
