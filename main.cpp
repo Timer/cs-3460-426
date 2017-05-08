@@ -1,3 +1,11 @@
+/**
+ * Project 4B (Bumper Cars!)
+ *
+ * Joseph Haddad
+ * Emily Trenka
+ * Caleb Kupetz
+ */
+
 #include <pthread.h>
 #include <semaphore.h>
 #include <cassert>
