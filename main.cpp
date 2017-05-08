@@ -9,7 +9,7 @@
 #include <thread>
 
 #define N_CARS 2
-#define N_RIDERS 50
+#define N_RIDERS 5
 #define T_WANDER 100 /* each wandering time is between 0 to T_WANDER */
 #define T_BUMP 40    /* each bumping time is between 0 to T_BUMP */
 
