@@ -120,7 +120,7 @@ void *Car(void *_cid) {
 }
 
 /* Displaying thread */
-void Display(void *dummy) {
+void *Display(void *dummy) {
   while (!finish()) {
     /*printf("The current situation in the park is:\n");
     for (int i = 1; i <= N_CARS; ++i) {
@@ -168,10 +168,13 @@ int main(int argc, char *argv[]) {
     *id = i;
     pthread_create(&riders[i], NULL, Rider, (void *) id);
   }
+  pthread_t displayThread;
+  pthread_create(&displayThread, NULL, Display, nullptr);
   // Wait for the cars to run out of gas (?)
   for (int i = 0; i < N_CARS; ++i) { pthread_join(cars[i], NULL); }
   // Un-wait all riders so that they die
   for (int i = 0; i < N_RIDERS; ++i) { V(&WaitForRideBegin[i]); }
   for (int i = 0; i < N_RIDERS; ++i) { pthread_join(riders[i], NULL); }
+  pthread_join(displayThread, NULL);
   return 0;
 }
