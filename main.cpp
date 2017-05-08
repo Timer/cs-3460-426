@@ -26,6 +26,7 @@ int COUNT_DOWN = 10; /* Simulation time: Total number of bumper car rides */
 std::deque<int> WaitArea;
 
 int CarPerson[N_CARS];
+bool IsWaiting[N_RIDERS];
 
 void P(sem_t *s) {
   while (sem_wait(s) != 0) {}
@@ -51,6 +52,7 @@ void GetInLine(int rid) {
 }
 
 void TakeASeat(int rid) {
+  IsWaiting[rid] = true;
   P(&WaitForRideBegin[rid]);
   if (finish()) {
     printf("Rider %d has left because we're shutdown.\n", rid);
@@ -59,6 +61,7 @@ void TakeASeat(int rid) {
 }
 
 void TakeARide(int rid) {
+  IsWaiting[rid] = false;
   printf("Rider %d is taking the ride.\n", rid);
   P(&WaitForRideOver[rid]);
 }
@@ -131,9 +134,9 @@ void *Display(void *dummy) {
     for (int i = 1; i <= N_CARS; ++i) {
       auto rid = CarPerson[i - 1];
       if (rid >= 0) {
-        printf("Car %d is running. The rider is %d.\n", i - 1, rid);
+        printf("Car %d is running. The rider is %d\n", i - 1, rid);
       } else {
-        printf("Car %d is not running.\n", i - 1);
+        printf("Car %d is not running\n", i - 1);
       }
     }
 
@@ -142,11 +145,10 @@ void *Display(void *dummy) {
       for (int j = 0; j < N_CARS && !inCar; ++j) {
         inCar = CarPerson[j] == i - 1;
       }
-      int beginVal;
-      sem_getvalue(&WaitForRideBegin[i - 1], &beginVal);
+      bool inLine = IsWaiting[i - 1];
       if (inCar) {
         printf("Rider %d is in a car.\n", i - 1);
-      } else if (beginVal >= 1) {
+      } else if (inLine) {
         printf("Rider %d is waiting in line\n", i - 1);
       } else {
         printf("Rider %d is wandering\n", i - 1);
@@ -172,14 +174,16 @@ int main(int argc, char *argv[]) {
 
   pthread_t cars[N_CARS];
   for (int i = 0; i < N_CARS; ++i) {
+    CarPerson[i] = -1;
+
     int *id = new int;
     *id = i;
     pthread_create(&cars[i], NULL, Car, (void *) id);
-
-    CarPerson[i] = -1;
   }
   pthread_t riders[N_RIDERS];
   for (int i = 0; i < N_RIDERS; ++i) {
+    IsWaiting[i] = false;
+
     int *id = new int;
     *id = i;
     pthread_create(&riders[i], NULL, Rider, (void *) id);
