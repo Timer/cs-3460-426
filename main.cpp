@@ -133,13 +133,17 @@ void *Display(void *dummy) {
     }
 
     for (int i = 1; i <= N_RIDERS; ++i) {
-      /*if (Rider[i] is wandering) {
-        printf("Rider i is wandering\n");
-      } else if (Rider[i] is waiting in line) {
+      int beginVal;
+      sem_getvalue(&WaitForRideBegin[i - 1], &beginVal);
+      int overVal;
+      sem_getvalue(&WaitForRideOver[i - 1], &overVal);
+      if (beginVal >= 1) {
         printf("Rider i is waiting in line\n");
-      } else {
+      } else if (overVal >= 1) {
         printf("Rider i is in a car.\n");
-      }*/
+      } else {
+        printf("Rider i is wandering\n");
+      }
     }
 
     std::this_thread::sleep_for(std::chrono::seconds(T_DISPLAY));
@@ -175,9 +179,9 @@ int main(int argc, char *argv[]) {
   pthread_create(&displayThread, NULL, Display, nullptr);
   // Wait for the cars to run out of gas (?)
   for (int i = 0; i < N_CARS; ++i) { pthread_join(cars[i], NULL); }
+  pthread_join(displayThread, NULL);
   // Un-wait all riders so that they die
   for (int i = 0; i < N_RIDERS; ++i) { V(&WaitForRideBegin[i]); }
   for (int i = 0; i < N_RIDERS; ++i) { pthread_join(riders[i], NULL); }
-  pthread_join(displayThread, NULL);
   return 0;
 }
