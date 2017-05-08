@@ -73,6 +73,7 @@ void *Rider(void *_rid) {
       break;
     }
   }
+  return nullptr;
 }
 
 int Load(int cid) {
@@ -115,6 +116,7 @@ void *Car(void *_cid) {
     V(&CountMutex);
     if (finish()) break;
   }
+  return nullptr;
 }
 
 /* Displaying thread */
