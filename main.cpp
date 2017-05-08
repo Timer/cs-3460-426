@@ -122,24 +122,24 @@ void *Car(void *_cid) {
 /* Displaying thread */
 void *Display(void *dummy) {
   while (!finish()) {
-    /*printf("The current situation in the park is:\n");
+    printf("The current situation in the park is:\n");
     for (int i = 1; i <= N_CARS; ++i) {
-      if (Car[i] is running) {
+      /*if (Car[i] is running) {
         printf("Car i is running. The rider is ???\n");
       } else {
         printf("Car i is not running.\n");
-      }
+      }*/
     }
 
     for (int i = 1; i <= N_RIDERS; ++i) {
-      if (Rider[i] is wandering) {
+      /*if (Rider[i] is wandering) {
         printf("Rider i is wandering\n");
       } else if (Rider[i] is waiting in line) {
         printf("Rider i is waiting in line\n");
       } else {
         printf("Rider i is in a car.\n");
-      }
-    }*/
+      }*/
+    }
   }
 }
 
