@@ -25,6 +25,8 @@ sem_t WaitForRideOver[N_RIDERS];
 int COUNT_DOWN = 10; /* Simulation time: Total number of bumper car rides */
 std::deque<int> WaitArea;
 
+int CarPerson[N_CARS];
+
 void P(sem_t *s) {
   while (sem_wait(s) != 0) {}
 }
@@ -87,6 +89,7 @@ int Load(int cid) {
   if (WaitArea.size() < 1) assert(false);
   int this_guy = WaitArea.front();
   WaitArea.pop_front();
+  CarPerson[cid] = this_guy;
   printf("Car %d takes the rider %d.\n", cid, this_guy);
   V(&LineMutex);
 
@@ -101,6 +104,7 @@ void Bump(int cid, int interval) {
 
 void Unload(int cid, int rid) {
   printf("This ride of Car %d is over. Get out %d.\n", cid, rid);
+  CarPerson[cid] = -1;
   V(&WaitForRideOver[rid]);
 }
 
@@ -125,24 +129,27 @@ void *Display(void *dummy) {
   while (!finish()) {
     printf("The current situation in the park is:\n");
     for (int i = 1; i <= N_CARS; ++i) {
-      /*if (Car[i] is running) {
-        printf("Car i is running. The rider is ???\n");
+      auto rid = CarPerson[i - 1];
+      if (rid >= 0) {
+        printf("Car %d is running. The rider is %d.\n", i - 1, rid);
       } else {
-        printf("Car i is not running.\n");
-      }*/
+        printf("Car %d is not running.\n", i - 1);
+      }
     }
 
     for (int i = 1; i <= N_RIDERS; ++i) {
+      bool inCar = false;
+      for (int j = 0; j < N_CARS && !inCar; ++j) {
+        inCar = CarPerson[j] == i - 1;
+      }
       int beginVal;
       sem_getvalue(&WaitForRideBegin[i - 1], &beginVal);
-      int overVal;
-      sem_getvalue(&WaitForRideOver[i - 1], &overVal);
-      if (beginVal >= 1) {
-        printf("Rider i is waiting in line\n");
-      } else if (overVal >= 1) {
-        printf("Rider i is in a car.\n");
+      if (inCar) {
+        printf("Rider %d is in a car.\n", i - 1);
+      } else if (beginVal >= 1) {
+        printf("Rider %d is waiting in line\n", i - 1);
       } else {
-        printf("Rider i is wandering\n");
+        printf("Rider %d is wandering\n", i - 1);
       }
     }
 
@@ -168,6 +175,8 @@ int main(int argc, char *argv[]) {
     int *id = new int;
     *id = i;
     pthread_create(&cars[i], NULL, Car, (void *) id);
+
+    CarPerson[i] = -1;
   }
   pthread_t riders[N_RIDERS];
   for (int i = 0; i < N_RIDERS; ++i) {
